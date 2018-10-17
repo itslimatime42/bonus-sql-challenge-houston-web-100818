@@ -1,15 +1,26 @@
 require_relative '../config/environment'
 require_relative '../config/sql_runner'
 require_relative '../db/seed.rb'
+require 'pry'
+
 
 # Who did Jon Stewart have on the Daily Show the most? => FAREED ZAKARIA (19 appearances)
 def guest_with_most_appearances
   @db.execute("SELECT raw_guest_list FROM guests GROUP BY raw_guest_list ORDER BY COUNT(id) DESC LIMIT 1")
 end
 
-# What was the most popular profession of guest for each year? =>
+# What was the most popular profession of guest for each year? => ACTOR FOR EVERY YEAR
 def most_common_profession_by_year
-  @db.execute("SELECT a.year, a.occupation, FROM(SELECT year, occupation, COUNT(id) AS number FROM guests GROUP BY year, occupation) AS a")
+  year = 1999
+  professions = []
+  while year < 2016
+    profession = [year]
+    profession << @db.execute("SELECT occupation FROM guests WHERE year = ? GROUP BY occupation ORDER BY COUNT(id) DESC LIMIT 1",year)
+
+    professions << profession
+    year += 1
+  end
+  professions
 end
 
 # What profession was on the show most overall? => ACTOR (596 appearances)
@@ -34,5 +45,17 @@ end
 
 # What was the most popular "Group" for each year Jon Stewart hosted?
 def most_common_group_by_year
-  @db.execute("SELECT year, category, COUNT(id) FROM guests GROUP BY year, category")
+  year = 1999
+  groups = []
+  while year < 2016
+    group = [year]
+    group << @db.execute("SELECT category FROM guests WHERE year = ? GROUP BY category ORDER BY COUNT(id) DESC LIMIT 1",year)
+
+    groups << group
+    year += 1
+  end
+  groups
 end
+
+binding.pry
+0
